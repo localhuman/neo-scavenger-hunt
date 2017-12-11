@@ -1,9 +1,9 @@
-from boa.blockchain.vm.Neo.Runtime import CheckWitness,Notify,GetTrigger
-from boa.blockchain.vm.Neo.TriggerType import Application,Verification
+from boa.blockchain.vm.Neo.Runtime import CheckWitness, Notify, GetTrigger
+from boa.blockchain.vm.Neo.TriggerType import Application, Verification
 from boa.code.builtins import concat
 
 from common.storage_api import StorageAPI
-from common.txio import Attachments,get_asset_attachments
+from common.txio import Attachments, get_asset_attachments
 
 from stuff.question import Questions
 
@@ -14,6 +14,7 @@ answer_gas_req = 2000000
 progress_gas_req = 100
 
 total_q = 5
+
 
 def Main(operation, args):
 
@@ -26,22 +27,20 @@ def Main(operation, args):
 
         return False
 
-
     storage = StorageAPI()
 
     questions = Questions()
     questions.owner = owner
 
-
     if operation == 'get_clue':
         addr = get_addr(clue_gas_req)
         cluenum = args[0]
-        return questions.get_clue(storage,cluenum, addr)
+        return questions.get_clue(storage, cluenum, addr)
 
     elif operation == 'set_clue':
         cluenum = args[0]
         clueval = args[1]
-        return questions.set_clue(storage,cluenum, clueval)
+        return questions.set_clue(storage, cluenum, clueval)
 
     elif operation == 'set_answer':
         cluenum = args[0]
@@ -54,14 +53,14 @@ def Main(operation, args):
             return b'Not enough arguments'
         cluenum = args[0]
         answer = args[1]
-        return questions.submit_answer(storage,cluenum,answer,addr)
+        return questions.submit_answer(storage, cluenum, answer, addr)
 
     elif operation == 'total_questions':
         return total_q
 
     elif operation == 'progress':
         addr = get_addr(progress_gas_req)
-        key = concat('progress_',addr)
+        key = concat('progress_', addr)
         return storage.getitem(key)
 
     elif operation == 'total_winners':
@@ -81,10 +80,10 @@ def Main(operation, args):
 
 def get_addr(gas_required):
 
-    attachments = get_asset_attachments() # type: Attachments
+    attachments = get_asset_attachments()  # type: Attachments
 
     if attachments.gas_attached < gas_required:
         print("Not enough gas")
         return 0
 
-    return  attachments.sender_addr
+    return attachments.sender_addr

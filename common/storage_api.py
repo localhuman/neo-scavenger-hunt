@@ -5,7 +5,6 @@ class StorageAPI():
 
     ctx = GetContext()
 
-
     def getitem(self, key):
 
         return Get(self.ctx, key)

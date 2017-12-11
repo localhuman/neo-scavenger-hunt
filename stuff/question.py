@@ -1,15 +1,15 @@
-from boa.code.builtins import concat,sha256,hash256
+from boa.code.builtins import concat, sha256, hash256
 from boa.blockchain.vm.Neo.Runtime import CheckWitness
 from common.storage_api import StorageAPI
+
 
 class Questions():
 
     owner = 0
 
+    def get_progress(self, storage: StorageAPI, address, required):
 
-    def get_progress(self, storage:StorageAPI, address, required):
-
-        key = concat('progress_',address)
+        key = concat('progress_', address)
 
         current = storage.getitem(key)
         if required > current:
@@ -17,44 +17,41 @@ class Questions():
 
         return True
 
-    def get_clue(self, storage:StorageAPI, index, address):
+    def get_clue(self, storage: StorageAPI, index, address):
 
         if address == 0:
             return b'Please attach at least .01 gas to get this clue'
 
-        can_get_clue = self.get_progress(storage,address, index)
+        can_get_clue = self.get_progress(storage, address, index)
 
         if not can_get_clue:
             return b'You must answer all previous questions before getting this one'
 
-        clue_str = concat('clue',index)
+        clue_str = concat('clue', index)
         return storage.getitem(clue_str)
 
-
-
-    def submit_answer(self, storage:StorageAPI, index, answer, address):
+    def submit_answer(self, storage: StorageAPI, index, answer, address):
 
         if address == 0:
             return b'Please attach at least .02 gas to submit an answer'
 
-        can_submit_answer = self.get_progress(storage,address, index)
+        can_submit_answer = self.get_progress(storage, address, index)
 
         if not can_submit_answer:
             return b'You must answer all previous questions before answering this one'
 
         hash_answer = hash256(answer)
 
-        answer_key = concat('answer',index)
+        answer_key = concat('answer', index)
         real_answer = storage.getitem(answer_key)
 
 #        Notify(hash_answer)
 
         if hash_answer == real_answer:
 
-            next = index+1
+            next = index + 1
 
             if next == 5:
-
 
                 total_winners = self.check_winners(storage, address)
 
@@ -83,29 +80,27 @@ class Questions():
                     message = b'You have finished the scavenger hunt! Unfortunately others have beaten you.  Thanks for trying'
 
             else:
-                ok = self.set_progress(storage,next, address)
+                ok = self.set_progress(storage, next, address)
 
                 message = concat(b'Answer Correct! You may now move on to question ', next)
-
 
             return message
 
         return b'Incorrect Answer'
 
-    def set_clue(self, storage:StorageAPI, index, value):
+    def set_clue(self, storage: StorageAPI, index, value):
 
         if not CheckWitness(self.owner):
             print("must be owner to set clue")
             return False
 
-        clue_str = concat('clue',index)
+        clue_str = concat('clue', index)
 
         storage.putitem(clue_str, value)
 
         return True
 
-
-    def set_answer(self, storage:StorageAPI, index, value):
+    def set_answer(self, storage: StorageAPI, index, value):
 
         if not CheckWitness(self.owner):
             print("must be owner to set answer")
@@ -116,10 +111,10 @@ class Questions():
         storage.putitem(clue_str, value)
         return b'Set Answer'
 
-    def set_progress(self, storage:StorageAPI, index, addr):
+    def set_progress(self, storage: StorageAPI, index, addr):
 
         if CheckWitness(self.owner):
-            progress_key = concat('progress_',addr)
+            progress_key = concat('progress_', addr)
             current_val = storage.getitem(progress_key)
 
             # we don't want people to go backwards if they answer an old question
@@ -130,13 +125,12 @@ class Questions():
 
         return False
 
-
-    def check_winners(self, storage:StorageAPI, address):
+    def check_winners(self, storage: StorageAPI, address):
 
         if address == self.owner:
             return 10000
 
-        place_key = concat('place',address)
+        place_key = concat('place', address)
 
         current_place = storage.getitem(place_key)
 
@@ -144,27 +138,23 @@ class Questions():
         if current_place > 0:
             return 0
 
-
         total_winners = storage.getitem('total_winners')
         place = total_winners + 1
         storage.putitem('total_winners', place)
 
         storage.putitem(place_key, place)
 
-        #persist winners
+        # persist winners
         if place == 1:
 
-            storage.putitem('first_place',address)
+            storage.putitem('first_place', address)
 
         elif place == 2:
 
-            storage.putitem('second_place',address)
+            storage.putitem('second_place', address)
 
         elif place == 3:
 
             storage.putitem('third_place', address)
 
-
         return place
-
-
