@@ -7,7 +7,7 @@ from common.txio import Attachments, get_asset_attachments
 
 from stuff.question import Questions
 
-owner = b'\xe0\xa9\xce\x8c\xb0j\x8c\xb7-J,\x91+n0\\\xbb\x04\xe5\xb7'
+owner = b'\x13\xff4\xcc\x10\x1cVs\x7fe\xc3\xb3\xd2\xf9iTHESK'
 
 clue_gas_req = 1000000
 answer_gas_req = 2000000
